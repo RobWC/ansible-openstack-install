@@ -9,5 +9,11 @@
       - name: Install Python apt
         apt: name=python-apt state=present update_cache=yes cache_valid_time=3600
 
+      - name: Install Python apt
+        apt: name=ubuntu-cloud-keyring state=present
+
       - name: Install OpenStack Repository
         apt_repository: repo='deb http://ubuntu-cloud.archive.canonical.com/ubuntu trusty-updates/{{ openstack_release }} main' state=present
+
+      - name: Update apt
+        apt: update_cache=yes

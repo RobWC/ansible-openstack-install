@@ -1,0 +1,75 @@
+---
+- name: Install Identity (Keystone) Service
+  hosts: identityservers
+  sudo: yes
+
+  tasks:
+      - name: Create Keystone database
+        mysql_db: login_user=root login_password={{ MYSQL_ROOT }} name=keystone state=present
+
+      - name: Create Keystone database user
+        mysql_user: login_user=root login_password={{ MYSQL_ROOT }}  name=keystone password={{ KEYSTONE_DBPASS }} priv=keystone.*:ALL state=present
+
+      - name: Disable Keystone autostart
+        shell: echo "manual" | sudo tee /etc/init/keystone.override
+
+      - name: Install Keystone
+        apt: name={{ item }} state=present update_cache=yes cache_valid_time=3600
+        with_items:
+            - keystone
+            - python-openstackclient
+            - apache2
+            - libapache2-mod-wsgi
+            - memcached
+            - python-memcache
+
+      - name: Configure Admin Token
+        lineinfile: dest=/etc/keystone/keystone.conf regexp='^#admin_token = ADMIN' line='admin_token = {{ KEYSTONE_DBPASS }}'
+
+      - name: Configure Keystone Database Connection
+        lineinfile: dest=/etc/keystone/keystone.conf regexp='^connection = sqlite:////var/lib/keystone/keystone.db' line='connection = mysql://keystone:{{ KEYSTONE_DBPASS }}@localhost/keystone'
+
+      - name: Configure Keystone Memcache Connection
+        lineinfile: dest=/etc/keystone/keystone.conf regexp='^#servers = localhost:1121' line='servers = localhost:1121'
+
+      - name: Configure Keystone Memcahe UUID Token Provider
+        lineinfile: dest=/etc/keystone/keystone.conf regexp='^#provider = keystone.token.providers.uuid.Provider' line='provider = keystone.token.providers.uuid.Provider'
+
+      - name: Configure Keystone Memcahe UUID Token
+        lineinfile: dest=/etc/keystone/keystone.conf regexp='^#driver = keystone.token.persistence.backends.sql.Token' line='driver = keystone.token.persistence.backends.sql.Token'
+
+      - name: Configure Keystone SQL Revocation Driver
+        lineinfile: dest=/etc/keystone/keystone.conf regexp='^#driver = keystone.contrib.revoke.backends.sql.Revoke' line='driver = keystone.contrib.revoke.backends.sql.Revoke'
+
+      - name: Populate the Identity Service Database
+        command: /usr/bin/keystone-manage db_sync
+
+      - name: Install Apache2 Keystone Virtual Host File
+        copy: src=files/wsgi-keystone.conf dest=/etc/apache2/sites-available/wsgi-keystone.conf mode=0644
+
+      - name: Softlink Apache2 Keystone Config
+        file: src=/etc/apache2/sites-available/wsgi-keystone.conf dest=/etc/apache2/sites-enabled/wsgi-keystone.conf state=link
+
+      - name: Create Keysone WSGI components directory
+        file: path=/var/www/cgi-bin/keystone state=directory
+
+      - name: Install Keystone WSGI components
+        copy: src=files/keystone_wsgi dest=/var/www/cgi-bin/keystone/{{ item }} mode=0644
+        with_items:
+            - main
+            - admin
+
+      - name: Fix Permissions on Keystone WSGI Files
+        file: path=/var/www/cgi-bin/keystone owner=keystone group=keystone mode=0755 recurse=yes state=directory
+
+      - name: Enable Apache2 WSGI MOD
+        shell: /usr/sbin/a2enmod wsgi
+
+      - name: Restart Apache2 Service
+        service: name=apache2 state=restarted
+
+      - name: Create OpenStack Identity Service
+        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack service create --name keystone --description "OpenStack Identity" identity
+
+      - name: Create OpenStack Identity Endpoint
+        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack endpoint create --publicurl http://localhost:5000/v2.0 --internalurl http://localhost:5000/v2.0 --adminurl http://localhost:35357/v2.0 --region RegionOne identity

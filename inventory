@@ -10,6 +10,12 @@
 [mqservers]
 172.21.202.46
 
+[identityservers]
+172.21.202.46
+
+[imageservers]
+172.21.202.46
+
 [servers]
 172.21.202.46
 

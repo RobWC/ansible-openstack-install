@@ -19,7 +19,7 @@
     - name: Set MariaDB Settings
       copy: src=files/mysqld_openstack.cnf dest=/etc/mysql/conf.d/mysqld_openstack.cnf mode=0644
 
-    - name: Reload MariaDB Service
+    - name: Restart MariaDB Service
       service: name=mysql state=restarted
 
     - name: Install Python MySQLDB Driver
