@@ -1,0 +1,8 @@
+---
+- name: Install Basic Environment
+  hosts: servers
+
+- include: ntp-service.yml
+- include: mariadb-service.yml
+- include: rabbitmq-service.yml
+- include: openstack-repo.yml

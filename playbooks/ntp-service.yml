@@ -1,0 +1,14 @@
+---
+- name: Deploy NTP
+  hosts: ntpservers
+  sudo: yes
+
+  tasks:
+    - name: Install NTP service
+      apt: name=ntp state=present update_cache=yes cache_valid_time=3600
+
+    - name: Set NTP settings
+      copy: src=files/ntp.conf dest=/etc/ntp.conf mode=0644
+
+    - name: Reload NTP Service
+      service: name=ntp state=restarted

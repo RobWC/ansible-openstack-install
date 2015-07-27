@@ -1,0 +1,18 @@
+---
+- name: Deploy RabbitMQ
+  hosts: mqservers
+  sudo: yes
+
+  tasks:
+    - name: Install RabbitMQ service
+      apt: name=rabbitmq-server state=present update_cache=yes cache_valid_time=3600
+
+    - name: Set RabbitMQ OpenStack User
+      ignore_errors: True
+      command: /usr/sbin/rabbitmqctl add_user openstack {{ RABBIT_PASS }}
+
+    - name: Permit RabbitMQ Access for OpenStack User
+      command: /usr/sbin/rabbitmqctl set_permissions openstack ".*" ".*" ".*"
+
+    - name: Reload RabbitMQ Service
+      service: name=rabbitmq-server state=reloaded

@@ -1,0 +1,13 @@
+---
+- name: Install OpenStack Repo
+  hosts: openstackservers
+  sudo: yes
+  vars:
+      openstack_release: kilo
+
+  tasks:
+      - name: Install Python apt
+        apt: name=python-apt state=present update_cache=yes cache_valid_time=3600
+
+      - name: Install OpenStack Repository
+        apt_repository: repo='deb http://ubuntu-cloud.archive.canonical.com/ubuntu trusty-updates/{{ openstack_release }} main' state=present

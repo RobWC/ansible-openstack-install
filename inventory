@@ -1,0 +1,56 @@
+[openstackservers]
+172.21.202.46
+
+[ntpservers]
+172.21.202.46
+
+[dbservers]
+172.21.202.46
+
+[mqservers]
+172.21.202.46
+
+[servers]
+172.21.202.46
+
+[servers:vars]
+#Root password for database
+MYSQL_ROOT=08c7f555cd15b62f1655
+#Password of user guest of RabbitMQ
+RABBIT_PASS=08c7f555cd15b62f1655
+#Database password of Identity service
+KEYSTONE_DBPASS=08c7f555cd15b62f1655
+#Password of user demo
+DEMO_PASS=08c7f555cd15b62f1655
+#Password of user admin
+ADMIN_PASS=08c7f555cd15b62f1655
+#Database password for Image Service
+GLANCE_DBPASS=08c7f555cd15b62f1655
+#Password of Image Service user glance
+GLANCE_PASS=08c7f555cd15b62f1655
+#Database password for Compute service
+NOVA_DBPASS=08c7f555cd15b62f1655
+#Password of Compute service user nova
+NOVA_PASS=08c7f555cd15b62f1655
+#Database password for the dashboard
+DASH_DBPASS=08c7f555cd15b62f1655
+#Database password for the Block Storage service
+CINDER_DBPASS=08c7f555cd15b62f1655
+#Password of Block Storage service user cinder
+CINDER_PASS=08c7f555cd15b62f1655
+#Database password for the Networking service
+NEUTRON_DBPASS=08c7f555cd15b62f1655
+#Password of Networking service user neutron
+NEUTRON_PASS=08c7f555cd15b62f1655
+#Database password for the Orchestration service
+HEAT_DBPASS=08c7f555cd15b62f1655
+#Password of Orchestration service user heat
+HEAT_PASS=08c7f555cd15b62f1655
+#Database password for the Telemetry service
+CEILOMETER_DBPASS=08c7f555cd15b62f1655
+#Password of Telemetry service user ceilometer
+CEILOMETER_PASS=08c7f555cd15b62f1655
+#Database password of Database service
+TROVE_DBPASS=08c7f555cd15b62f1655
+#Password of Database Service user trove
+TROVE_PASS=08c7f555cd15b62f1655
