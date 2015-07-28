@@ -1,0 +1,14 @@
+---
+- name: Install Compute (Nova) Nodes
+  hosts: computenodes
+  sudo: yes
+
+  tasks:
+    - name: Install Compute Node Packages
+      apt: name={{ item }} state=present update_cache=yes cache_valid_time=3600
+      with_items:
+        - nova-compute
+        - sysfsutils
+
+    - name: Generate Nova Compute Config
+      template: src=files/nova-compute.conf.j2 dest=/etc/nova/nova.conf owner=nova group=nova mode=0644

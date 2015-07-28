@@ -8,7 +8,10 @@
         mysql_db: login_user=root login_password={{ MYSQL_ROOT }} name=glance state=present
 
       - name: Create Glance database user
-        mysql_user: login_user=root login_password={{ MYSQL_ROOT }} name=keystone password={{ GLANCE_DBPASS }} priv=glance.*:ALL state=present
+        mysql_user: login_user=root login_password={{ MYSQL_ROOT }} host={{ inventory_hostname }} name=glance password={{ GLANCE_DBPASS }} priv=glance.*:ALL state=present
+
+      - name: Create Glance Service Credentials
+        command: openstack user create --password={{ GLANCE_PASS }} glance
 
       - name: Install Glance
         apt: name={{ item }} state=present update_cache=yes cache_valid_time=3600
@@ -16,69 +19,18 @@
           - glance
           - python-glanceclient
 
-      - name: Configure Glance API Database Connection
-        lineinfile: dest=/etc/glance/glance-api.conf regexp='^sqlite_db = /var/lib/glance/glance.sqlite' line='connection = mysql://glance:{{ GLANCE_DBPASS }}@localhost/glance'
+      - name: Generate Glance API Config
+        template: src=files/glance-api.conf.j2 dest=/etc/glance/glance-api.conf owner=glance group=glance mode=0644
 
-      - name: Configure Glance API Identity Service Flavor
-        lineinfile: dest=/etc/glance/glance-api.conf regexp='^#flavor=' line='flavor = keystone'
-
-      - name: Configure Glance API Notification Driver
-        lineinfile: dest=/etc/glance/glance-api.conf regexp='^# notification_driver = noop' line='notification_driver = noop'
-
-      - name: Disable Glance API Default Keystone Configuration
-        lineinfile: dest=/etc/glance/glance-api.conf regexp='^({{ item }})' line='#\1' backrefs=yes
-        with_items:
-          - identity_uri = http://127.0.0.1:35357
-          - admin_tenant_name = %SERVICE_TENANT_NAME%
-          - admin_user = %SERVICE_USER%
-          - admin_password = %SERVICE_PASSWORD%
-
-      - name: Configure Glance API Default Keystone Configuration
-        lineinfile: dest=/etc/glance/glance-api.conf insertafter='[keystone_authtoken]' regexp='^{{ item }}' line='{{ item }}'
-        with_items:
-          - auth_uri = http://localhost:5000
-          - auth_url = http://localhost:35357
-          - auth_plugin = password
-          - project_domain_id = default
-          - user_domain_id = default
-          - project_name = service
-          - username = glance
-          - password = {{ GLANCE_DBPASS }}
-
-      - name: Configure Glance Registry Database Connection
-        lineinfile: dest=/etc/glance/glance-registry.conf regexp='^sqlite_db = /var/lib/glance/glance.sqlite' line='connection = mysql://glance:{{ GLANCE_DBPASS }}@localhost/glance'
-
-      - name: Configure Glance Registry Identity Service Flavor
-        lineinfile: dest=/etc/glance/glance-registry.conf regexp='^#flavor=' line='flavor = keystone'
-
-      - name: Configure Glance Registry Notification Driver
-        lineinfile: dest=/etc/glance/glance-registry.conf regexp='^# notification_driver = noop' line='notification_driver = noop'
-
-      - name: Disable Glance API Default Keystone Configuration
-        lineinfile: dest=/etc/glance/glance-registry.conf regexp='^({{ item }})' line='#\1' backrefs=yes
-        with_items:
-            - identity_uri = http://127.0.0.1:35357
-            - admin_tenant_name = %SERVICE_TENANT_NAME%
-            - admin_user = %SERVICE_USER%
-            - admin_password = %SERVICE_PASSWORD%
-
-      - name: Configure Glance Registry Default Keystone Configuration
-        lineinfile: dest=/etc/glance/glance-registry.conf insertafter='[keystone_authtoken]' regexp='^{{ item }}' line='{{ item }}'
-        with_items:
-          - auth_uri = http://localhost:5000
-          - auth_url = http://localhost:35357
-          - auth_plugin = password
-          - project_domain_id = default
-          - user_domain_id = default
-          - project_name = service
-          - username = glance
-          - password = {{ GLANCE_DBPASS }}
+      - name: Generate Glance Registry Config
+        template: src=files/glance-registry.conf.j2 dest=/etc/glance/glance-api.conf owner=glance group=glance mode=0644
 
       - name: Create OpenStack Glance Service
         shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack service create --name glance --description "OpenStack Image Service" image
 
       - name: Create OpenStack Glance Endpoint
         shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack endpoint create --publicurl http://localhost:9292/v2.0 --internalurl http://localhost:9292/v2.0 --adminurl http://localhost:9292/v2.0 --region RegionOne image
+        ignore_errors: True
 
       - name: Populate the Glance Service Database
         command: /usr/bin/glance-manage db_sync

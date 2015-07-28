@@ -16,10 +16,21 @@
 [imageservers]
 172.21.202.46
 
+[computeservers]
+172.21.202.46
+
+[computenodes]
+172.21.202.46
+
 [servers]
 172.21.202.46
 
 [servers:vars]
+OPENSTACK_DB_HOST=172.21.202.46
+KEYSTONE_HOST=172.21.202.46
+GLANCE_HOST=172.21.202.46
+OPENSTACK_AMQ_HOST=172.21.202.46
+
 #Root password for database
 MYSQL_ROOT=08c7f555cd15b62f1655
 #Password of user guest of RabbitMQ

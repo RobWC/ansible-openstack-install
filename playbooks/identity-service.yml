@@ -8,7 +8,7 @@
         mysql_db: login_user=root login_password={{ MYSQL_ROOT }} name=keystone state=present
 
       - name: Create Keystone database user
-        mysql_user: login_user=root login_password={{ MYSQL_ROOT }}  name=keystone password={{ KEYSTONE_DBPASS }} priv=keystone.*:ALL state=present
+        mysql_user: login_user=root login_password={{ MYSQL_ROOT }} host={{ inventory_hostname }} name=keystone password={{ KEYSTONE_DBPASS }} priv=keystone.*:ALL state=present
 
       - name: Disable Keystone autostart
         shell: echo "manual" | sudo tee /etc/init/keystone.override

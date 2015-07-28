@@ -1,0 +1,51 @@
+---
+- name: Install Compute (Nova) Service
+  hosts: computeservers
+  sudo: yes
+
+  tasks:
+      - name: Create Glance database
+        mysql_db: login_user=root login_password={{ MYSQL_ROOT }} name=glance state=present
+
+      - name: Create Glance database user
+        mysql_user: login_user=root login_password={{ MYSQL_ROOT }} host={{ inventory_hostname }} name=nova password={{ NOVA_DBPASS }} priv=nova.*:ALL state=present
+
+      - name: Create Nova Service Credentials
+        command: openstack user create --password={{ NOVA_PASS }} nova
+
+      - name: Create Nova Service Credentials Group
+        command: openstack role add --project=service --user nova admin
+
+      - name: Install Glance
+        apt: name={{ item }} state=present update_cache=yes cache_valid_time=3600
+        with_items:
+          - nova-api
+          - nova-cert
+          - nova-conductor
+          - nova-consoleauth
+          - nova-novncproxy
+          - nova-scheduler
+          - python-novaclient
+
+      - name: Generate Nova Service Config
+        template: src=files/nova-service.conf.j2 dest=/etc/nova/nova.conf owner=nova group=nova mode=0644
+
+      - name: Create OpenStack Nova Service
+        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack service create --name nova --description "OpenStack Compute Service" compute
+
+      - name: Create OpenStack Nova Endpoint
+        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack endpoint create --publicurl http://localhost:8774/v2/%(tenant_id)s --internalurl --publicurl http://localhost:8774/v2/%(tenant_id)s --adminurl --publicurl http://localhost:8774/v2/%(tenant_id)s --region RegionOne compute
+        ignore_errors: True
+
+      - name: Populate the Nova Service Database
+        command: /usr/bin/nova-manage db_sync
+
+      - name: Restart Nova Services
+        service: name={{ item }} state=restarted
+        with_items:
+            - nova-api
+            - nova-cert
+            - nova-consoleauth
+            - nova-scheduler
+            - nova-conductor
+            - nova-novncproxy
