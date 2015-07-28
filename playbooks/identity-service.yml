@@ -5,7 +5,7 @@
 
   tasks:
       - name: Create Keystone database
-        mysql_db: login_user=root login_password={{ MYSQL_ROOT }} name=keystone state=present
+        mysql_db: login_user=root login_password={{ MYSQL_ROOT }} name=keystone  state=present
 
       - name: Create Keystone database user
         mysql_user: login_user=root login_password={{ MYSQL_ROOT }} host={{ inventory_hostname }} name=keystone password={{ KEYSTONE_DBPASS }} priv=keystone.*:ALL state=present
@@ -73,3 +73,6 @@
 
       - name: Create OpenStack Identity Endpoint
         shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack endpoint create --publicurl http://localhost:5000/v2.0 --internalurl http://localhost:5000/v2.0 --adminurl http://localhost:35357/v2.0 --region RegionOne identity
+
+      - name: Create Identity Admin Role
+        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack role create admin

@@ -4,17 +4,19 @@
   sudo: yes
 
   tasks:
-      - name: Create Glance database
-        mysql_db: login_user=root login_password={{ MYSQL_ROOT }} name=glance state=present
+      - name: Create Nova database
+        mysql_db: login_user=root login_password={{ MYSQL_ROOT }} name=nova state=present
 
-      - name: Create Glance database user
+      - name: Create Nova database user
         mysql_user: login_user=root login_password={{ MYSQL_ROOT }} host={{ inventory_hostname }} name=nova password={{ NOVA_DBPASS }} priv=nova.*:ALL state=present
 
       - name: Create Nova Service Credentials
-        command: openstack user create --password={{ NOVA_PASS }} nova
+        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack user create --password={{ NOVA_PASS }} nova
+        ignore_errors: True
 
       - name: Create Nova Service Credentials Group
-        command: openstack role add --project=service --user nova admin
+        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack role add --project=service --user nova admin
+        ignore_errors: True
 
       - name: Install Glance
         apt: name={{ item }} state=present update_cache=yes cache_valid_time=3600
@@ -34,11 +36,11 @@
         shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack service create --name nova --description "OpenStack Compute Service" compute
 
       - name: Create OpenStack Nova Endpoint
-        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack endpoint create --publicurl http://localhost:8774/v2/%(tenant_id)s --internalurl --publicurl http://localhost:8774/v2/%(tenant_id)s --adminurl --publicurl http://localhost:8774/v2/%(tenant_id)s --region RegionOne compute
+        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack endpoint create --publicurl http://localhost:8774/v2/%\(tenant_id\)s" --internalurl http://localhost:8774/v2/%\(tenant_id\)s --adminurl http://localhost:8774/v2/%\(tenant_id\)s --region RegionOne compute
         ignore_errors: True
 
       - name: Populate the Nova Service Database
-        command: /usr/bin/nova-manage db_sync
+        command: /usr/bin/nova-manage db sync
 
       - name: Restart Nova Services
         service: name={{ item }} state=restarted

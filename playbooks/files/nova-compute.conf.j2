@@ -1,0 +1,41 @@
+[DEFAULT]
+dhcpbridge_flagfile=/etc/nova/nova.conf
+dhcpbridge=/usr/bin/nova-dhcpbridge
+log_dir=/var/log/nova
+state_path=/var/lib/nova
+lock_path=/var/lock/nova
+force_dhcp_release=True
+libvirt_use_virtio_for_bridges=True
+verbose=True
+ec2_private_dns_show_ip=True
+api_paste_config=/etc/nova/api-paste.ini
+enabled_apis=ec2,osapi_compute,metadata
+
+vnc_enabled = True
+my_ip = 0.0.0.0
+vncserver_listen = 0.0.0.0
+vncserver_proxyclient_address = 0.0.0.0
+novncproxy_base_url = http://{{NOVA_HOST}}:6080/vnc_auto.html
+
+rpc_backend = rabbit
+
+[keystone_authtoken]
+auth_uri = http://{{ KEYSTONE_HOST }}:5000
+auth_url = http://{{ KEYSTONE_HOST }}:35357
+auth_plugin = password
+project_domain_id = default
+user_domain_id = default
+project_name = service
+username = glance
+password = {{ NOVA_PASS }}
+
+[oslo_messaging_rabbit]
+rabbit_host = {{ OPENSTACK_AMQ_HOST }}
+rabbit_userid = openstack
+rabbit_password = {{ RABBIT_PASS }}
+
+[oslo_concurrency]
+lock_path = /var/lib/nova/tmp
+
+[glance]
+host = {{ GLANCE_HOST }}

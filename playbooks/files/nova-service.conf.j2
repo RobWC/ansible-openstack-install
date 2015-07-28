@@ -1,7 +1,7 @@
 [DEFAULT]
 dhcpbridge_flagfile=/etc/nova/nova.conf
 dhcpbridge=/usr/bin/nova-dhcpbridge
-logdir=/var/log/nova
+log_dir=/var/log/nova
 state_path=/var/lib/nova
 lock_path=/var/lock/nova
 force_dhcp_release=True
@@ -14,7 +14,7 @@ enabled_apis=ec2,osapi_compute,metadata
 auth_strategy = keystone
 my_ip = 0.0.0.0
 vncserver_listen = 0.0.0.0
-vncserver_proxyclient_address = 10.0.0.0
+vncserver_proxyclient_address = 0.0.0.0
 
 [keystone_authtoken]
 auth_uri = http://{{ KEYSTONE_HOST }}:5000
