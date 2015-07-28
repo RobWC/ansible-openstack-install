@@ -1,0 +1,16 @@
+---
+- name: Install Dashboard (Horozion) Service
+  hosts: imageservers
+  sudo: yes
+
+  tasks:
+    - name: Install Dashboard
+      apt: name={{ item }} state=present update_cache=yes cache_valid_time=3600
+      with_items:
+        - openstack-dashboard
+
+    - name: Generate Dashboard Config
+      template: src=files/dashboard-local_settings.py.j2 dest=/etc/openstack-dashboard/local_settings.py owner=root group=root mode=0644
+
+    - name: Restart Apache2 Service
+      service: name=apache2 state=restarted

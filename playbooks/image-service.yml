@@ -8,10 +8,14 @@
         mysql_db: login_user=root login_password={{ MYSQL_ROOT }} name=glance state=present
 
       - name: Create Glance database user
-        mysql_user: login_user=root login_password={{ MYSQL_ROOT }} host={{ inventory_hostname }} name=glance password={{ GLANCE_DBPASS }} priv=glance.*:ALL state=present
+        mysql_user: login_user=root login_password={{ MYSQL_ROOT }} host=localhost name=glance password={{ GLANCE_DBPASS }} priv=glance.*:ALL state=present
 
       - name: Create Glance Service Credentials
-        command: openstack user create --password={{ GLANCE_PASS }} glance
+        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ GLANCE_DBPASS }} openstack user create --password={{ GLANCE_PASS }} glance
+
+      - name: Create Glance Service Credentials Group
+        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack role add --project=service --user glance admin
+        ignore_errors: True
 
       - name: Install Glance
         apt: name={{ item }} state=present update_cache=yes cache_valid_time=3600
@@ -23,7 +27,7 @@
         template: src=files/glance-api.conf.j2 dest=/etc/glance/glance-api.conf owner=glance group=glance mode=0644
 
       - name: Generate Glance Registry Config
-        template: src=files/glance-registry.conf.j2 dest=/etc/glance/glance-api.conf owner=glance group=glance mode=0644
+        template: src=files/glance-registry.conf.j2 dest=/etc/glance/glance-registry.conf owner=glance group=glance mode=0644
 
       - name: Create OpenStack Glance Service
         shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack service create --name glance --description "OpenStack Image Service" image

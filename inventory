@@ -33,7 +33,10 @@ GLANCE_HOST=172.21.202.46
 NOVA_HOST=172.21.202.46
 
 OPENSTACK_AMQ_HOST=172.21.202.46
+OPENSTACK_MEMCACHE_HOST=172.21.202.46
 
+#openstack admin user password
+ADMIN_PASS=08c7f555cd15b62f1655
 #Root password for database
 MYSQL_ROOT=08c7f555cd15b62f1655
 #Password of user guest of RabbitMQ

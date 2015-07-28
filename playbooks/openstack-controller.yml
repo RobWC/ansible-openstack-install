@@ -1,0 +1,8 @@
+---
+- name: Install OpenStack Controller Services
+  hosts: servers 
+
+- include: identity-service.yml
+- include: image-service.yml
+- include: compute-service.yml
+- include: dashboard-service.yml

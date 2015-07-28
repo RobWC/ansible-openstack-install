@@ -5,10 +5,10 @@
 
   tasks:
     - name: Set default root password for MariaDB
-      command: /usr/bin/debconf-set-selections <<< {{ item }}
-      with_items:
-          - 'mysql-server mysql-server/root_password password {{ MYSQL_ROOT }}'
-          - 'mysql-server mysql-server/root_password_again password {{ MYSQL_ROOT }}'
+      command: echo "mariadb-server-5.5 mysql-server/root_password password {{ MYSQL_ROOT }}" | /usr/bin/debconf-set-selections
+
+    - name: Confirm default root password for MariaDB
+      command: echo "mariadb-server-5.5 mysql-server/root_password_again password {{ MYSQL_ROOT }}" | /usr/bin/debconf-set-selections
 
     - name: Install MariaDB Service
       apt: name=mariadb-server state=present update_cache=yes cache_valid_time=3600
@@ -29,7 +29,7 @@
       mysql_db: name=test state=absent login_user=root login_password={{ MYSQL_ROOT }}
 
     - name: Provision MariaDB Server
-      command: /usr/bin/mysql -u root --password={{ MYSQL_ROOT }} -e "{{ item }}"
+      command: /usr/bin/mysql -u root -e "{{ item }}" --password={{ MYSQL_ROOT }}
       ignore_errors: True
       with_items:
           - DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');

@@ -8,7 +8,7 @@
         mysql_db: login_user=root login_password={{ MYSQL_ROOT }} name=nova state=present
 
       - name: Create Nova database user
-        mysql_user: login_user=root login_password={{ MYSQL_ROOT }} host={{ inventory_hostname }} name=nova password={{ NOVA_DBPASS }} priv=nova.*:ALL state=present
+        mysql_user: login_user=root login_password={{ MYSQL_ROOT }} host=localhost name=nova password={{ NOVA_DBPASS }} priv=nova.*:ALL state=present
 
       - name: Create Nova Service Credentials
         shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack user create --password={{ NOVA_PASS }} nova
@@ -36,7 +36,7 @@
         shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack service create --name nova --description "OpenStack Compute Service" compute
 
       - name: Create OpenStack Nova Endpoint
-        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack endpoint create --publicurl http://localhost:8774/v2/%\(tenant_id\)s" --internalurl http://localhost:8774/v2/%\(tenant_id\)s --adminurl http://localhost:8774/v2/%\(tenant_id\)s --region RegionOne compute
+        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack endpoint create --publicurl http://localhost:8774/v2/%\(tenant_id\)s --internalurl http://localhost:8774/v2/%\(tenant_id\)s --adminurl http://localhost:8774/v2/%\(tenant_id\)s --region RegionOne compute
         ignore_errors: True
 
       - name: Populate the Nova Service Database
