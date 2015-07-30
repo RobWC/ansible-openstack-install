@@ -17,8 +17,7 @@
 
     - name: Generate Nova Compute Config
       template: src=files/nova-compute.conf.j2 dest=/etc/nova/nova-compute.conf owner=nova group=nova mode=0644
-#nova-compute.conf
-
+      
     - name: Restart Nova Services
       service: name={{ item }} state=restarted
       with_items:

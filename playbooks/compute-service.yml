@@ -27,6 +27,9 @@
       - name: Generate Nova Service Config
         template: src=files/nova.conf.j2 dest=/etc/nova/nova.conf owner=nova group=nova mode=0644
 
+      - name: Generate Nova api-paste.ini
+        template: src=files/nova-compute-api-paste.ini.j2 dest=/etc/nova/api-paste.ini owner=nova group=nova mode=0644
+
       - name: Create OpenStack Nova Service
         shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack service create --name nova --description "OpenStack Compute Service" compute
 

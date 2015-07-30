@@ -1,0 +1,21 @@
+---
+- name: Install Networking (Neutron) Service
+  hosts: networknodes
+  sudo: yes
+
+  tasks:
+    - name: Create Neutron database
+      mysql_db: login_user=root login_password={{ MYSQL_ROOT }} name=neutron state=present
+
+    - name: Create Neutron database user for localhost
+      mysql_user: login_user=root login_password={{ MYSQL_ROOT }} host=localhost name=neutron password={{ NEUTRON_DBPASS }} priv=neutron.*:ALL state=present
+
+    - name: Create Neutron database user for {{ inventory_hostname }}
+      mysql_user: login_user=root login_password={{ MYSQL_ROOT }} host={{ inventory_hostname }} name=neutron password={{ NEUTRON_DBPASS }} priv=neutron.*:ALL state=present
+
+    - name: Create OpenStack Neutron Service
+      shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ NEUTRON_DBPASS }} openstack service create --name neutron --description "OpenStack Neutron Service" network
+
+    - name: Create OpenStack Neutron Endpoint
+      shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ NEUTRON_DBPASS }} openstack endpoint create --publicurl http://localhost:9696 --internalurl http://localhost:9696 --adminurl http://localhost:9696 --region RegionOne compute
+      ignore_errors: True

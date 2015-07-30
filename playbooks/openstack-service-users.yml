@@ -19,3 +19,11 @@
       - name: Create Nova Service Credentials Group
         shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack role add --project=service --user nova admin
         ignore_errors: True
+
+      - name: Create Neutron Service Credentials
+        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack user create --password={{ NEUTRON_PASS }} neutron
+        ignore_errors: True
+
+      - name: Create Neutron Service Credentials Group
+        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack role add --project=service --user neutron admin
+        ignore_errors: True
