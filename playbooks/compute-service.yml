@@ -25,7 +25,7 @@
           - python-novaclient
 
       - name: Generate Nova Service Config
-        template: src=files/nova-service.conf.j2 dest=/etc/nova/nova.conf owner=nova group=nova mode=0644
+        template: src=files/nova.conf.j2 dest=/etc/nova/nova.conf owner=nova group=nova mode=0644
 
       - name: Create OpenStack Nova Service
         shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack service create --name nova --description "OpenStack Compute Service" compute

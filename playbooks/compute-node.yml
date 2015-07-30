@@ -2,6 +2,8 @@
 - name: Install Compute (Nova) Nodes
   hosts: computenodes
   sudo: yes
+  vars:
+      nova_virt_type: qemu
 
   tasks:
     - name: Install Compute Node Packages
@@ -10,10 +12,14 @@
         - nova-compute
         - sysfsutils
 
-    - name: Generate Nova Compute Config
-      template: src=files/nova-compute.conf.j2 dest=/etc/nova/nova.conf owner=nova group=nova mode=0644
+    - name: Generate Nova Config
+      template: src=files/nova.conf.j2 dest=/etc/nova/nova.conf owner=nova group=nova mode=0644
 
-      - name: Restart Nova Services
-        service: name={{ item }} state=restarted
-        with_items:
-            - nova-compute
+    - name: Generate Nova Compute Config
+      template: src=files/nova-compute.conf.j2 dest=/etc/nova/nova-compute.conf owner=nova group=nova mode=0644
+#nova-compute.conf
+
+    - name: Restart Nova Services
+      service: name={{ item }} state=restarted
+      with_items:
+        - nova-compute
