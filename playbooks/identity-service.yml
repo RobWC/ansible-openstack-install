@@ -7,7 +7,10 @@
       - name: Create Keystone database
         mysql_db: login_user=root login_password={{ MYSQL_ROOT }} name=keystone  state=present
 
-      - name: Create Keystone database user
+      - name: Create Keystone database user for localhost
+        mysql_user: login_user=root login_password={{ MYSQL_ROOT }} host=localhost name=keystone password={{ KEYSTONE_DBPASS }} priv=keystone.*:ALL state=present
+
+      - name: Create Keystone database user for {{ inventory_hostname }}
         mysql_user: login_user=root login_password={{ MYSQL_ROOT }} host={{ inventory_hostname }} name=keystone password={{ KEYSTONE_DBPASS }} priv=keystone.*:ALL state=present
 
       - name: Disable Keystone autostart
@@ -54,19 +57,7 @@
         service: name=apache2 state=restarted
 
       - name: Create OpenStack Identity Service
-        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack service create --name keystone --description "OpenStack Identity" identity
+        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack service create --name keystone --description "OpenStack Identity Service" identity
 
       - name: Create OpenStack Identity Endpoint
         shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack endpoint create --publicurl http://{{ KEYSTONE_HOST }}:5000/v2.0 --internalurl http://{{ KEYSTONE_HOST }}:5000/v2.0 --adminurl http://{{ KEYSTONE_HOST }}:35357/v2.0 --region RegionOne identity
-
-      - name: Create Identity Admin Role
-        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack role create admin
-
-      - name: Create Identity Admin Project
-        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack project create --description "Admin Project" admin
-
-      - name: Create Service Project
-        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack project create --description "Services" service
-
-      - name: Create Identity Admin User
-        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack user create admin --password {{ ADMIN_PASS }}

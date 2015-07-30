@@ -1,0 +1,25 @@
+  ---
+  - name: Install Identity (Keystone) Service
+    hosts: identityservers
+    sudo: yes
+
+    tasks:
+      - name: Create Identity Admin Role
+        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack role create admin
+        ignore_errors: True
+
+      - name: Create Identity Admin Project
+        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack project create --description "Admin Project" admin
+        ignore_errors: True
+
+      - name: Create Service Project
+        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack project create --description "Services" service
+        ignore_errors: True
+
+      - name: Create Identity Admin User
+        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack user create admin --password {{ ADMIN_PASS }}
+        ignore_errors: True
+
+      - name: Create Nova Service Credentials Group
+        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack role add --project=admin --user admin admin
+        ignore_errors: True

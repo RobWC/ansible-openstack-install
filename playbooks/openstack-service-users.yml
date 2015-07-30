@@ -1,0 +1,21 @@
+  ---
+  - name: Install Identity (Keystone) Service
+    hosts: identityservers
+    sudo: yes
+
+    tasks:
+      - name: Create Glance Service Credentials
+        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ GLANCE_DBPASS }} openstack user create --password={{ GLANCE_PASS }} glance
+        ignore_errors: True
+
+      - name: Create Glance Service Credentials Group
+        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack role add --project=service --user glance admin
+        ignore_errors: True
+
+      - name: Create Nova Service Credentials
+        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack user create --password={{ NOVA_PASS }} nova
+        ignore_errors: True
+
+      - name: Create Nova Service Credentials Group
+        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack role add --project=service --user nova admin
+        ignore_errors: True

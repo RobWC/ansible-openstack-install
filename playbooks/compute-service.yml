@@ -7,16 +7,11 @@
       - name: Create Nova database
         mysql_db: login_user=root login_password={{ MYSQL_ROOT }} name=nova state=present
 
-      - name: Create Nova database user
+      - name: Create Nova database user for localhost
         mysql_user: login_user=root login_password={{ MYSQL_ROOT }} host=localhost name=nova password={{ NOVA_DBPASS }} priv=nova.*:ALL state=present
 
-      - name: Create Nova Service Credentials
-        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack user create --password={{ NOVA_PASS }} nova
-        ignore_errors: True
-
-      - name: Create Nova Service Credentials Group
-        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack role add --project=service --user nova admin
-        ignore_errors: True
+      - name: Create Nova database user for {{ inventory_hostname }}
+        mysql_user: login_user=root login_password={{ MYSQL_ROOT }} host={{ inventory_hostname }} name=nova password={{ NOVA_DBPASS }} priv=nova.*:ALL state=present
 
       - name: Install Glance
         apt: name={{ item }} state=present update_cache=yes cache_valid_time=3600
