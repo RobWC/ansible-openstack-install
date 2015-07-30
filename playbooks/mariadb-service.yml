@@ -5,10 +5,10 @@
 
   tasks:
     - name: Set default root password for MariaDB
-      command: echo "mariadb-server-5.5 mysql-server/root_password password {{ MYSQL_ROOT }}" | /usr/bin/debconf-set-selections
+      shell: echo "mariadb-server-5.5 mysql-server/root_password password {{ MYSQL_ROOT }}" | sudo /usr/bin/debconf-set-selections
 
     - name: Confirm default root password for MariaDB
-      command: echo "mariadb-server-5.5 mysql-server/root_password_again password {{ MYSQL_ROOT }}" | /usr/bin/debconf-set-selections
+      shell: echo "mariadb-server-5.5 mysql-server/root_password_again password {{ MYSQL_ROOT }}" | sudo /usr/bin/debconf-set-selections
 
     - name: Install MariaDB Service
       apt: name=mariadb-server state=present update_cache=yes cache_valid_time=3600
