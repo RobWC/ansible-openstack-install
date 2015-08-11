@@ -9,9 +9,4 @@
 
      - name: Create Heat database user for localhost
        mysql_user: login_user=root login_password={{ MYSQL_ROOT }} host=localhost name=heat password={{ HEAT_DBPASS }} priv=heat.*:ALL state=present
-
-      - name: Create OpenStack Orchestration Service
-        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack service create --name orchestration --description "OpenStack Orchestration Service" orchestration
-
-      - name: Create OpenStack Orchestration Endpoint
-        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack endpoint create --publicurl http://{{ KEYSTONE_HOST }}:5000/v2.0 --internalurl http://{{ KEYSTONE_HOST }}:5000/v2.0 --adminurl http://{{ KEYSTONE_HOST }}:35357/v2.0 --region RegionOne identity
+       

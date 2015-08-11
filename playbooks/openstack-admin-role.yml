@@ -19,7 +19,3 @@
       - name: Create Identity Admin User
         shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack user create admin --password {{ ADMIN_PASS }}
         ignore_errors: True
-
-      - name: Create Nova Service Credentials Group
-        shell: OS_URL=http://localhost:35357/v2.0 OS_TOKEN={{ KEYSTONE_DBPASS }} openstack role add --project=admin --user admin admin
-        ignore_errors: True
