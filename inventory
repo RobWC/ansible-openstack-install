@@ -22,6 +22,9 @@
 [computenodes]
 172.21.202.46
 
+[heatnodes]
+172.21.202.46
+
 [servers]
 172.21.202.46
 
